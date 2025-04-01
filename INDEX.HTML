@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Calculadora de Cajas y Cotización</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Calculadora">
+    <link rel="apple-touch-icon" href="icon.png">
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registrado', reg))
+                    .catch(err => console.error('Error registrando el Service Worker', err));
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(to right, #2408F7, #1E88E5);
+            color: #fff;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .btn {
+            background-color: #1E88E5;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #1565C0;
+        }
+
+        .result, .error {
+            margin-top: 20px;
+            font-size: 16px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result {
+            background-color: rgba(0, 255, 127, 0.8);
+            color: #000;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #00FF7F;
+        }
+
+        .error {
+            background-color: #D32F2F;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Cajas y Cotización</h1>
+        <div class="form-group">
+            <label for="x">Metros cuadrados solicitados (X m²):</label>
+            <input type="number" id="x" placeholder="Ingrese X m²" inputmode="decimal">
+        </div>
+        <div class="form-group">
+            <label for="totalCaja">Total de m² por caja:</label>
+            <input type="number" id="totalCaja" placeholder="Ingrese m² por caja" inputmode="decimal">
+        </div>
+        <div class="form-group">
+            <label for="precioM2">Precio por m²:</label>
+            <input type="number" id="precioM2" placeholder="Ingrese el precio por m²" inputmode="decimal">
+        </div>
+        <button class="btn" id="calcularBtn">Calcular</button>
+        <div class="result" id="resultado"></div>
+        <div class="error" id="error"></div>
+    </div>
+    <script>
+        document.getElementById("calcularBtn").addEventListener("touchstart", function() {
+            calcular();
+        });
+        document.getElementById("calcularBtn").addEventListener("click", function() {
+            calcular();
+        });
+
+        function calcular() {
+            const x = parseFloat(document.getElementById('x').value);
+            const totalCaja = parseFloat(document.getElementById('totalCaja').value);
+            const precioM2 = parseFloat(document.getElementById('precioM2').value);
+            const resultado = document.getElementById('resultado');
+            const error = document.getElementById('error');
+            
+            resultado.style.display = 'none';
+            error.style.display = 'none';
+            
+            if (isNaN(x) || isNaN(totalCaja) || isNaN(precioM2) || x <= 0 || totalCaja <= 0 || precioM2 <= 0) {
+                error.textContent = 'Ingrese valores válidos mayores a 0';
+                error.style.display = 'block';
+                return;
+            }
+            
+            const cajasNecesarias = Math.ceil(x / totalCaja);
+            const precioPorCaja = totalCaja * precioM2;
+            const cotizacion = cajasNecesarias * precioPorCaja;
+            
+            resultado.innerHTML = `
+                <p style="font-size:20px; margin-bottom:10px;">📦 Cajas necesarias: <strong>${cajasNecesarias}</strong></p>
+                <p style="font-size:18px; margin-bottom:10px;">💲 Precio por caja: <strong>$${precioPorCaja.toFixed(2)}</strong></p>
+                <p style="font-size:22px; color:#008000;">💰 Cotización total: <strong>$${cotizacion.toFixed(2)}</strong></p>
+            `;
+            resultado.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
